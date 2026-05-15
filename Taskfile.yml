@@ -1,0 +1,86 @@
+version: '3'
+
+vars:
+  GOOS: "{{default OS .GOOS}}"
+  MVNW: '{{if eq .GOOS "windows"}}mvnw.cmd{{else}}sh ./mvnw{{end}}'
+  SLEEP_CMD: '{{if eq .GOOS "windows"}}timeout{{else}}sleep{{end}}'
+  DC_FILE: "docker-compose.yml"
+
+tasks:
+
+  default:
+    desc: Starts application stack
+    cmds:
+      - task: start
+
+  verify:
+    desc: Run application tests
+    cmds:
+      - "{{.MVNW}} verify"
+
+  # Application stack
+  start:
+    desc: Run previously built backend application and dependencies
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - docker compose --profile docker -f "{{.DC_FILE}}" up -d
+
+  stop:
+    desc: Stop backend application and dependencies.
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - docker compose --profile docker -f "{{.DC_FILE}}" stop
+
+  purge:
+    desc: Stop backend application and dependencies. All dependencies would be deleted
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - docker compose --profile docker -f "{{.DC_FILE}}" stop
+      - docker compose --profile docker -f "{{.DC_FILE}}" rm -f
+
+  # Backend
+  purge-backend:
+    desc: Stop backend application only. Backend container and image would be deleted
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - docker compose --profile docker -f "{{.DC_FILE}}" stop app
+      - docker compose --profile docker -f "{{.DC_FILE}}" rm -f app
+      - docker image rm -f rentfilms-app:latest
+
+  stop-backend:
+    desc: Stop backend application only. Backend container and image would be deleted
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - docker compose --profile docker -f "{{.DC_FILE}}" stop app
+      - docker compose --profile docker -f "{{.DC_FILE}}" rm -f app
+      - docker image rm -f rentfilms-app:latest
+
+  start-backend:
+    desc: Start backend application only. Backend image would be built and new container started
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - "{{.MVNW}} clean package -DskipTests"
+      - docker compose --profile docker -f "{{.DC_FILE}}" up -d app
+
+  restart-backend:
+    desc: Start backend application only. Backend image would be built and new container started
+    preconditions:
+      - test -f docker-compose.yml
+    cmds:
+      - task: purge-backend
+      - task: sleep
+      - task: start-backend
+
+  # Common
+  sleep:
+    desc: Sleep for a while
+    vars:
+      DURATION: "{{default 2 .DURATION}}"
+    cmds:
+      - "{{.SLEEP_CMD}} {{.DURATION}}"

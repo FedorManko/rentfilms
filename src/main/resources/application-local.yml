@@ -1,0 +1,20 @@
+spring:
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rentfilms}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+
+  liquibase:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rentfilms}
+    user: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    enabled: true
+
+  docker:
+    compose:
+      file: ./docker-compose.yml
+      lifecycle-management: start_only
+      start:
+        skip: if_running
+      enabled: true

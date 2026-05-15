@@ -1,0 +1,88 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-films-to-rent
+      author: f.manko
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: films_to_rent
+      changes:
+        - createTable:
+            tableName: films_to_rent
+            remarks: Films to rent table
+            columns:
+              - column: { name: id, type: uuid, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: timestamptz, constraints: { nullable: false } }
+              - column: { name: updated_at, type: timestamptz, constraints: { nullable: false } }
+              - column: { name: title, type: varchar(64), constraints: { nullable: false, unique: true } }
+              - column: { name: type, type: varchar(16), constraints: { nullable: false } }
+              - column: { name: quantity, type: integer, constraints: { nullable: false } }
+              - column: { name: version, type: integer, constraints: { nullable: false } }
+              - column: { name: deleted, type: boolean, defaultValue: false, constraints: { nullable: false} }
+
+
+  - changeSet:
+      id: insert-default-films
+      author: f.manko
+      preConditions:
+        - onFail: MARK_RAN
+        - tableIsEmpty:
+            tableName: films_to_rent
+      changes:
+        - insert:
+            tableName: films_to_rent
+            columns:
+              - column: { name: id, value: '8efbccc1-887e-4779-8d34-150b173aa990' }
+              - column: { name: created_at, value: now() }
+              - column: { name: updated_at, value: now() }
+              - column: { name: title, value: 'Matrix' }
+              - column: { name: type, value: 'NEW_RELEASE' }
+              - column: { name: quantity, value: 10 }
+              - column: { name: version, value: 0 }
+              - column: { name: deleted, value: false }
+        - insert:
+            tableName: films_to_rent
+            columns:
+              - column: { name: id, value: '23df3241-d915-4fae-a480-0715b5f38874' }
+              - column: { name: created_at, value: now() }
+              - column: { name: updated_at, value: now() }
+              - column: { name: title, value: 'Spider-man' }
+              - column: { name: type, value: 'REGULAR' }
+              - column: { name: quantity, value: 5 }
+              - column: { name: version, value: 0 }
+              - column: { name: deleted, value: false }
+        - insert:
+            tableName: films_to_rent
+            columns:
+              - column: { name: id, value: '242c4b41-2ff9-499b-8e09-a9ec5b354228' }
+              - column: { name: created_at, value: now() }
+              - column: { name: updated_at, value: now() }
+              - column: { name: title, value: 'Iron Man' }
+              - column: { name: type, value: 'NEW_RELEASE' }
+              - column: { name: quantity, value: 3 }
+              - column: { name: version, value: 0 }
+              - column: { name: deleted, value: false }
+        - insert:
+            tableName: films_to_rent
+            columns:
+              - column: { name: id, value: '319529f1-5d6b-44e2-a068-43ecd467f05e' }
+              - column: { name: created_at, value: now() }
+              - column: { name: updated_at, value: now() }
+              - column: { name: title, value: 'GodFather' }
+              - column: { name: type, value: 'OLD' }
+              - column: { name: quantity, value: 4 }
+              - column: { name: version, value: 0 }
+              - column: { name: deleted, value: false }
+
+        - insert:
+            tableName: films_to_rent
+            columns:
+              - column: { name: id, value: '1ff51202-e264-4921-a47a-1390f6ec6ad3' }
+              - column: { name: created_at, value: now() }
+              - column: { name: updated_at, value: now() }
+              - column: { name: title, value: 'Shawshank Redemption' }
+              - column: { name: type, value: 'REGULAR' }
+              - column: { name: quantity, value: 15 }
+              - column: { name: version, value: 0 }
+              - column: { name: deleted, value: false }

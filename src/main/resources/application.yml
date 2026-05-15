@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: rentfilms-api
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
+    enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    urls:
+      - name: Films API
+        url: /openapi/rent-films-api.yml

@@ -1,0 +1,639 @@
+openapi: 3.0.3
+info:
+  title: Rent Films API
+  description: The Rent Films API provides programmatic access to get films data and rent them.
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+    description: Rent films API local server.
+  - url: http://localhost:8081
+    description: Rent films API docker container server.
+tags:
+  - name: Film
+    description: Films functions allows to maintain available films to rent.
+  - name: RentFilm
+    description: Rent film functions allows to rent available or return films.
+
+paths:
+  /v1/films-to-rent:
+    get:
+      tags:
+        - Film
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/FilmListSort'
+      summary: Retrieve a list of films to rent
+      operationId: getAvailableFilms
+      description: Provides a list of films to rent by custom user sorting & filtering settings.
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedFilmsToRentResponseDto' }
+              examples:
+                Film page: { $ref: '#/components/examples/FilmPageResponseExample' }
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                PageValueExceededExample: { $ref: '#/components/examples/PageValueExceededExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+    post:
+      tags:
+        - Film
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilmRequestDto' }
+            examples:
+              Valid request: { $ref: '#/components/examples/FilmRequestDtoExample' }
+      summary: Creates new film
+      operationId: createFilm
+      description: Provides functionality to create a new film
+      responses:
+        201:
+          description: Ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FilmToRentResponseDto' }
+              examples:
+                Film page: { $ref: '#/components/examples/FilmResponseExample' }
+        409:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                PageValueExceededExample: { $ref: '#/components/examples/FilmAlreadyExistResponseExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+  /v1/films-to-rent/{filmId}:
+    get:
+      tags:
+        - Film
+      parameters:
+        - $ref: '#/components/parameters/FilmId'
+      summary: Retrieve film info
+      operationId: getFilm
+      description: Provides an information about film by id.
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FilmToRentResponseDto' }
+              examples:
+                Film response: { $ref: '#/components/examples/FilmResponseExample' }
+        404:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                FilmNotFoundException: { $ref: '#/components/examples/FilmDoesNotExistsResponseExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+    delete:
+      tags:
+        - Film
+      parameters:
+        - $ref: '#/components/parameters/FilmId'
+      summary: Delete film
+      operationId: deleteFilm
+      description: Deletes film by id, set boolean flag deleted to true.
+      responses:
+        204:
+          description: Ok
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                FilmNotFoundException: { $ref: '#/components/examples/FilmDoesNotExistsResponseExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+  /v1/rented-films/rent:
+    post:
+      tags:
+        - RentFilm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilmRentRequestDto' }
+            examples:
+              Valid request: { $ref: '#/components/examples/FilmRentRequestDtoExample' }
+      summary: Allow to rent films
+      operationId: rentFilms
+      description: Provides user functionality to rent films.
+      responses:
+        201:
+          description: Ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RentedFilmsResponseDto' }
+              examples:
+                Rented films response: { $ref: '#/components/examples/RentedFilmsResponseExample' }
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                PageValueExceededExample: { $ref: '#/components/examples/FilmsNotFoundResponseExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+  /v1/rented-films/return:
+    patch:
+      tags:
+        - RentFilm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilmReturnRequestDto' }
+            examples:
+              Valid request: { $ref: '#/components/examples/FilmReturnRequestDtoExample' }
+      summary: Allow to return films
+      operationId: returnFilms
+      description: Provides user functionality to return films.
+      responses:
+        201:
+          description: Ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RentedFilmsResponseDto' }
+              examples:
+                Rented films response: { $ref: '#/components/examples/RentedFilmsResponseExample' }
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                PageValueExceededExample: { $ref: '#/components/examples/PageValueExceededExample' }
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestError' }
+              examples:
+                Internal server error: { $ref: '#/components/examples/InternalServerErrorResponseExample' }
+
+components:
+
+  parameters:
+
+    # Ids
+    FilmId:
+      name: filmId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/FilmId'
+      description: Film unique identifier
+
+    # Pagination
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/PagePaginationParameter'
+      description: |-
+        Page number. Please note, that if `page` parameter is not passed - a default value of `0` will be used.
+      example: 0
+    
+    Size:
+      name: size
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/SizePaginationParameter'
+      description: |-
+        Page size. Please note, that if `size` parameter is not passed - a default value of `20` will be used.
+      example: 20
+    
+    SortDirection:
+      name: direction
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/SortDirection'
+      description: |-
+        Sort direction. Please note, that if `direction` parameter is not passed - a default value of `DESC` will be used.
+
+    FilmListSort:
+      name: sort
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/FilmListSort'
+      description: |-
+        Sort column. Please note, that if `sort` parameter is not passed - a default sort column will be used to preserve natural ordering.
+      example: title
+
+  schemas:
+
+    # Ids
+    FilmId:
+      type: string
+      format: uuid
+      example: fde21732-0e70-4013-ae7f-91e2657aaf58
+      description: Film unique identifier
+
+    RentedFilmId:
+      type: string
+      format: uuid
+      example: fde21732-0e70-4013-ae7f-91e2657aaf58
+      description: Rented film unique identifier
+
+    UserId:
+      type: string
+      format: uuid
+      example: fde21732-0e70-4013-ae7f-91e2657aaf58
+      description: Film unique identifier
+
+    Type:
+      type: string
+      enum:
+        - NEW_RELEASE
+        - REGULAR
+        - OLD
+      description: Film status
+      example: OLD
+
+    # Common
+    DateTime:
+      type: string
+      format: date-time
+      description: Date and time in UTC.
+      example: 2021-01-01T00:00:00Z
+
+
+    PagedResponse:
+      type: object
+      description: Base page response with pagination metadata.
+      properties:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      description: Pagination parameters, applied to the list of entities.
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: Current page number.
+          example: 0
+        pages:
+          type: integer
+          format: int32
+          description: Total number of pages.
+          example: 10
+        size:
+          type: integer
+          format: int32
+          description: Number of entities per page.
+        count:
+          type: integer
+          format: int32
+          description: Quantity of items within current page.
+        hasNext:
+          type: boolean
+          description: Indicates whether there are more entities to be retrieved.
+          example: false
+
+    SortDirection:
+      type: string
+      enum:
+        - asc
+        - desc
+      default: asc
+      example: asc
+
+    PagePaginationParameter:
+      type: integer
+      format: int32
+      minimum: 0
+      default: 0
+
+    SizePaginationParameter:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 2000
+      default: 20
+
+    FilmListSort:
+      type: string
+      enum:
+        - title
+        - createdAt
+      default: title
+      example: title
+
+    FilmTitle:
+      minLength: 2
+      maxLength: 64
+      pattern: ^[A-Za-z0-9 ]+$
+      type: string
+      example: Matrix
+      description: Some film title
+
+    FilmQuantity:
+      type: integer
+      minimum: 1
+      example: 4
+      description: Some film quantity
+
+    RentDays:
+      type: integer
+      minimum: 1
+      example: 4
+      description: Days to rent film
+
+    RentPrice:
+      type: integer
+      example: 5
+      description: Price fo rent
+
+    FilmRequestDto:
+      type: object
+      required:
+        - title
+        - quantity
+        - type
+      properties:
+        title: { $ref: '#/components/schemas/FilmTitle' }
+        quantity: { $ref: '#/components/schemas/FilmQuantity' }
+        type: { $ref: '#/components/schemas/Type' }
+
+    FilmRentRequestDto:
+      type: object
+      required:
+        - userId
+        - rentDays
+        - filmIds
+      properties:
+        userId: { $ref: '#/components/schemas/UserId' }
+        rentDays: { $ref: '#/components/schemas/RentDays' }
+        filmIds:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FilmId'
+
+    FilmReturnRequestDto:
+      type: object
+      required:
+        - userId
+        - rentedFilmIds
+      properties:
+        userId: { $ref: '#/components/schemas/UserId' }
+        rentedFilmIds:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/RentedFilmId'
+
+    FilmToRentItemDto:
+      type: object
+      required:
+        - id
+        - title
+        - quantity
+        - createdAt
+        - type
+      properties:
+        id: { $ref: '#/components/schemas/FilmId' }
+        title: { $ref: '#/components/schemas/FilmTitle' }
+        quantity: { $ref: '#/components/schemas/FilmQuantity' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        type: { $ref: '#/components/schemas/Type' }
+
+    FilmToRentResponseDto:
+      type: object
+      required:
+        - id
+        - title
+        - quantity
+        - createdAt
+        - updatedAt
+        - type
+      properties:
+        id: { $ref: '#/components/schemas/FilmId' }
+        title: { $ref: '#/components/schemas/FilmTitle' }
+        quantity: { $ref: '#/components/schemas/FilmQuantity' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        updatedAt: { $ref: '#/components/schemas/DateTime' }
+        type: { $ref: '#/components/schemas/Type' }
+
+    PagedFilmsToRentResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/PagedResponse'
+        - type: object
+      required:
+        - pagination
+        - items
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/FilmToRentItemDto' }
+
+    RentedFilmsResponseDto:
+      type: object
+      required:
+        - rentedFilms
+        - additionalPrice
+        - totalPrice
+      properties:
+        films:
+          type: array
+          items:
+            $ref: '#/components/schemas/RentedFilmResponseDto'
+        additionalPrice: { $ref: '#/components/schemas/RentPrice' }
+        totalPrice: { $ref: '#/components/schemas/RentPrice' }
+
+
+    RentedFilmResponseDto:
+      type: object
+      required:
+        - id
+        - filmId
+        - title
+        - createdAt
+        - type
+        - rentDays
+        - price
+      properties:
+        id: { $ref: '#/components/schemas/RentedFilmId' }
+        filmId: { $ref: '#/components/schemas/FilmId' }
+        title: { $ref: '#/components/schemas/FilmTitle' }
+        createdAt: { $ref: '#/components/schemas/DateTime' }
+        type: { $ref: '#/components/schemas/Type' }
+        rentDays: { $ref: '#/components/schemas/RentDays' }
+        price: { $ref: '#/components/schemas/RentPrice' }
+
+    # Errors
+
+    RestError:
+      type: object
+      required:
+        - method
+        - url
+        - timestamp
+        - message
+      properties:
+        method:
+          type: string
+          description: HTTP method name
+          example: GET
+        url:
+          type: string
+          description: Request URL
+        timestamp: { $ref: '#/components/schemas/DateTime' }
+        message:
+          type: string
+          description: Error message
+
+  examples:
+
+    InternalServerErrorResponseExample:
+      description: Unexpected backend, network, or system error occurs
+      value:
+        method: POST
+        url: /v1/endpoint
+        timestamp: 2026-11-02T11:42:53.482707500Z
+        message: Something went wrong. Please try again.
+
+    FilmAlreadyExistResponseExample:
+      description: Film already exists
+      value:
+        method: POST
+        url: /v1/admin/entities/initialize
+        timestamp: 2026-11-02T11:42:53.482707500Z
+        message: Film with this title already exists.
+
+    FilmDoesNotExistsResponseExample:
+      description: Film does not exists
+      value:
+        method: POST
+        url: /v1/endpoint
+        timestamp: 2026-11-02T11:42:53.482707500Z
+        message: Film doesn't exist, might be deleted.
+
+    FilmsNotFoundResponseExample:
+      description: Films not found
+      value:
+        method: POST
+        url: /v1/endpoint
+        timestamp: 2026-11-02T11:42:53.482707500Z
+        message: Films doesn't exist or all films are already rented.
+
+    PageValueExceededExample:
+      value:
+        method: GET
+        url: /v1/endpoint
+        timestamp: 2026-11-02T11:42:53.482707500Z
+        message: Page value cant exceed 2000
+
+    # Request examples
+    FilmRequestDtoExample:
+      description: Film create response example
+      value:
+        title: Matrix
+        quantity: 4
+        type: OLD
+
+    FilmRentRequestDtoExample:
+      description: Film rent request example
+      value:
+        userId: fde21732-0e70-4013-ae7f-91e2657aaf58
+        rentDays: 4
+        filmIds: [ 8efbccc1-887e-4779-8d34-150b173aa990, 23df3241-d915-4fae-a480-0715b5f38874 ]
+
+    FilmReturnRequestDtoExample:
+      description: Film return request example
+      value:
+        userId: fde21732-0e70-4013-ae7f-91e2657aaf58
+        rentedFilmIds: [ fde21732-0e70-4013-ae7f-91e2657aaf58, 9f702945-4450-4ca9-bfd4-ec60e7ef2767 ]
+
+    # Response examples
+    FilmPageResponseExample:
+      description: Film paged response example
+      value:
+        pagination:
+          page: 0
+          pages: 1
+          size: 20
+          count: 1
+          hasNext: false
+        items:
+          - id: 344bd801-b96d-4a65-ba00-a154eba1701d
+            title: Matrix
+            quantity: 4
+            createdAt: 2026-05-11T19:43:42.229685Z
+            type: OLD
+
+    FilmResponseExample:
+      description: Film response example
+      value:
+        id: 344bd801-b96d-4a65-ba00-a154eba1701d
+        title: Matrix
+        quantity: 4
+        createdAt: 2026-05-11T19:43:42.229685Z
+        updatedAt: 2026-05-11T19:43:42.229685Z
+        type: OLD
+
+    RentedFilmsResponseExample:
+      description: Rented films response example
+      value:
+        rentedFilms:
+          - id: 344bd801-b96d-4a65-ba00-a154eba1701d
+            filmId: 19ff7d08-569a-4095-a14a-30d7f5aef7d0
+            title: Matrix
+            createdAt: 2026-05-11T19:43:42.229685Z
+            type: OLD
+            rentDays: 4
+            price: 100
+        additionalPrice: 200

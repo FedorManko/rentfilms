@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-rented-films
+      author: f.manko
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: rented_films
+      changes:
+        - createTable:
+            tableName: rented_films
+            remarks: Films rented by users
+            columns:
+              - column: { name: id, type: uuid, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: timestamptz, constraints: { nullable: false } }
+              - column: { name: updated_at, type: timestamptz, constraints: { nullable: false } }
+              - column: { name: user_id, type: uuid, constraints: { nullable: false } }
+              - column: { name: film_id, type: uuid, constraints: { nullable: false } }
+              - column: { name: rent_days, type: integer, constraints: { nullable: false } }
+              - column: { name: returned, type: boolean, defaultValue: false, constraints: { nullable: false } }
+              - column: { name: price, type: integer, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: rented_films
+            baseColumnNames: film_id
+            referencedTableName: films_to_rent
+            referencedColumnNames: id
+            constraintName: fk_rented_film_film_to_rent
+        - sql:
+            sql: |
+              CREATE UNIQUE INDEX uq_rented_film_user_film_active
+              ON rented_films(user_id, film_id)
+              WHERE returned = false;
